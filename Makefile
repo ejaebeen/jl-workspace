@@ -35,8 +35,12 @@ help: ## Show this help message with available commands
 	@echo ""
 
 # ==============================================================================
-# Dependencies & Environment
+# Project Setup & Initialization
 # ==============================================================================
+.PHONY: init
+init: ## Bootstrap project (dependencies, .env, git hooks)
+	@./scripts/init.sh
+
 .PHONY: install
 install: ## Install base project dependencies
 	@echo "$(COLOR_GREEN)Installing dependencies with uv...$(COLOR_RESET)"
@@ -58,6 +62,25 @@ lock: ## Update dependency lockfile (uv.lock)
 	$(UV) lock
 
 # ==============================================================================
+# Scaffolding & Customization
+# ==============================================================================
+.PHONY: scaffold-agent
+scaffold-agent: ## Scaffold new agent workflow (Usage: make scaffold-agent NAME=researcher)
+	@if [ -z "$(NAME)" ]; then \
+		echo "$(COLOR_YELLOW)Please specify agent name, e.g.: make scaffold-agent NAME=researcher$(COLOR_RESET)"; \
+	else \
+		$(UV) run python scripts/scaffold_agent.py --name "$(NAME)"; \
+	fi
+
+.PHONY: rename
+rename: ## Rename template to custom project (Usage: make rename NAME=my-agent)
+	@if [ -z "$(NAME)" ]; then \
+		echo "$(COLOR_YELLOW)Please specify project name, e.g.: make rename NAME=my-agent$(COLOR_RESET)"; \
+	else \
+		$(UV) run python scripts/rename_project.py --name "$(NAME)"; \
+	fi
+
+# ==============================================================================
 # Application & Development Servers
 # ==============================================================================
 .PHONY: dev
@@ -74,6 +97,10 @@ run-prod: ## Run FastAPI application in production mode
 run-mcp: ## Run MCP server module
 	@echo "$(COLOR_GREEN)Starting MCP server...$(COLOR_RESET)"
 	$(UV) run python -m $(MCP_MODULE)
+
+.PHONY: test-mcp
+test-mcp: ## Verify MCP server and tool environment
+	@$(UV) run python scripts/test_mcp.py
 
 # ==============================================================================
 # Testing
@@ -153,7 +180,7 @@ docker-build-mcp: ## Build Docker container for the MCP service
 	docker build -f Dockerfile.mcp -t jl-workspace-mcp:latest .
 
 .PHONY: docker-build
-docker-build: docker-build-api docker-build-mcp ## Build all Docker containers
+docker-build: docker-build-api docker-build-mcp ## Build all Docker images
 
 # ==============================================================================
 # Cleanup
