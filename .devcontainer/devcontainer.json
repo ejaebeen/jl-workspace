@@ -1,0 +1,33 @@
+{
+  "name": "Python 3.12 with uv",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+
+  // Initialize workspace using uv
+  "postCreateCommand": "uv sync",
+
+  // Official Microsoft VS Code extensions & settings
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.mypy-type-checker"
+      ],
+      "settings": {
+        // Point to the virtual environment created by uv
+        "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+
+        // Enable official Microsoft Pylance type checking
+        "python.analysis.typeCheckingMode": "basic",
+
+        // Configure official Microsoft Mypy extension
+        "mypy-type-checker.importStrategy": "fromEnvironment"
+      }
+    }
+  },
+
+  "remoteUser": "vscode"
+}
